@@ -12,6 +12,7 @@ name="Set Softwares" #The bot will consider this person as its owner or creator
 bot_name="SAM" #This will be the name of your bot, eg: "Hello I am Astro Bot"
 model_name="gemini-1.5-flash-latest" #Switch to "gemini-1.0-pro" or any free model, if "gemini-1.5-flash" becomes paid in future.
 
+
 app=Flask(__name__)
 
 generation_config = {
@@ -44,7 +45,7 @@ convo.send_message(f'''I am using Gemini api for using you as a personal bot in 
 				   So reply to only the prompts after this. Remeber your new identity is {bot_name}.
 				   you are a tech expert and financial expert for business like restaurants and Cafés and small businesses, you work for a company called Set Softwares and your name is SAM, the company provides Point of Sale Systems for restaurants and cafes, erp system for small and mid sized businesses, digital menu and online ordering solutions for Food&Beverage businesses, your job is to communicate with the customers as friendly as possible and convince them to buy our softwares. When the sale is completed you must provide the details of the sale for the customer to confirm. Only when the sale is confirmed must you only respond: Lead in Process! we have a limited offer''')
 
-def send(answer):
+def send(answer,sender):
     url=f"https://graph.facebook.com/v18.0/{phone_id}/messages"
     headers={
         'Authorization': f'Bearer {wa_token}',
@@ -52,7 +53,7 @@ def send(answer):
     }
     data={
           "messaging_product": "whatsapp", 
-          "to": f"{phone}", 
+          "to": f"{sender}", 
           "type": "text",
           "text":{"body": f"{answer}"},
           }
@@ -83,10 +84,11 @@ def webhook():
     elif request.method == "POST":
         try:
             data = request.get_json()["entry"][0]["changes"][0]["value"]["messages"][0]
+	    sender="+"+data["from"]
             if data["type"] == "text":
                 prompt = data["text"]["body"]
                 convo.send_message(prompt)
-                send(convo.last.text)
+                send(convo.last.text,sender)
             else:
                 media_url_endpoint = f'https://graph.facebook.com/v18.0/{data[data["type"]]["id"]}/'
                 headers = {'Authorization': f'Bearer {wa_token}'}
@@ -106,8 +108,8 @@ def webhook():
                         file = genai.upload_file(path=destination,display_name="tempfile")
                         response = model.generate_content(["What is this",file])
                         answer=response._result.candidates[0].content.parts[0].text
-                        convo.send_message(f"This message is created by an llm model based on the image prompt of user, reply to the user based on this: {answer}")
-                        send(convo.last.text)
+                        convo.send_message(f"Direct image input has limitations, so this message is created by an llm model based on the image prompt of user, reply to the user assuming you saw that image: {answer}")
+                        send(convo.last.text,sender)
                         remove(destination)
                 else:send("This format is not Supported by the bot ☹")
                 with open(filename, "wb") as temp_media:
@@ -116,12 +118,15 @@ def webhook():
                 response = model.generate_content(["What is this",file])
                 answer=response._result.candidates[0].content.parts[0].text
                 remove("/tmp/temp_image.jpg","/tmp/temp_audio.mp3")
-                convo.send_message(f"This is an voice/image message from user transcribed by an llm model, reply to the user based on the transcription: {answer}")
-                send(convo.last.text)
+                convo.send_message(f"Direct media input has limitations, so this is a voice/image message from user which is transcribed by an llm model, reply to the user assuming you heard/saw media file: {answer}")
+                send(convo.last.text,sender)
                 files=genai.list_files()
                 for file in files:
                     file.delete()
         except :pass
         return jsonify({"status": "ok"}), 200
+if __name__ == "__main__":
+    app.run(debug=True, port=8000)
+
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
