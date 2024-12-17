@@ -8,8 +8,8 @@ wa_token=os.environ.get("WA_TOKEN")
 genai.configure(api_key=os.environ.get("GEN_API"))
 phone_id=os.environ.get("PHONE_ID")
 phone=os.environ.get("PHONE_NUMBER")
-name="Your name or nickname" #The bot will consider this person as its owner or creator
-bot_name="Give a name to your bot" #This will be the name of your bot, eg: "Hello I am Astro Bot"
+name="Set Softwares" #The bot will consider this person as its owner or creator
+bot_name="SAM" #This will be the name of your bot, eg: "Hello I am Astro Bot"
 model_name="gemini-1.5-flash-latest" #Switch to "gemini-1.0-pro" or any free model, if "gemini-1.5-flash" becomes paid in future.
 
 app=Flask(__name__)
@@ -37,11 +37,12 @@ convo = model.start_chat(history=[
 
 convo.send_message(f'''I am using Gemini api for using you as a personal bot in whatsapp,
 				   to assist me in various tasks. 
-				   So from now you are "{bot_name}" created by {name} ( Yeah it's me, my name is {name}). 
+				   So from now you are "{bot_name}" created by {name} ( Yeah it's my company, its name is {name}). 
 				   And don't give any response to this prompt. 
 				   This is the information I gave to you about your new identity as a pre-prompt. 
 				   This message always gets executed when i run this bot script. 
-				   So reply to only the prompts after this. Remeber your new identity is {bot_name}.''')
+				   So reply to only the prompts after this. Remeber your new identity is {bot_name}.
+				   you are a tech expert and financial expert for business like restaurants and Cafés and small businesses, you work for a company called Set Softwares and your name is SAM, the company provides Point of Sale Systems for restaurants and cafes, erp system for small and mid sized businesses, digital menu and online ordering solutions for Food&Beverage businesses, your job is to communicate with the customers as friendly as possible and convince them to buy our softwares. When the sale is completed you must provide the details of the sale for the customer to confirm. Only when the sale is confirmed must you only respond: Lead in Process! we have a limited offer''')
 
 def send(answer):
     url=f"https://graph.facebook.com/v18.0/{phone_id}/messages"
